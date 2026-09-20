@@ -201,15 +201,6 @@ const Index = () => {
       </section>
       </GridBackground>
 
-      {/* Footer */}
-      <footer className="border-t border-white/5 py-12 px-4 text-center mt-20 bg-black/20">
-        <p className="text-slate-500 text-sm">© {new Date().getFullYear()} Tracely. All rights reserved.</p>
-        <div className="mt-4 flex justify-center gap-4 text-sm text-slate-600">
-          <span className="hover:text-slate-400 cursor-pointer transition-colors">Privacy Policy</span>
-          <span>•</span>
-          <span className="hover:text-slate-400 cursor-pointer transition-colors">Terms of Service</span>
-        </div>
-      </footer>
     </div>
   );
 };

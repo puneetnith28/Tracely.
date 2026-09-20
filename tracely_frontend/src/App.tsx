@@ -8,6 +8,7 @@ import { Auth0Provider } from "@auth0/auth0-react";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider, AUTH0_CONFIG, useAuth } from "@/contexts/AuthContext";
 import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
@@ -51,6 +52,7 @@ const AppRoutes = () => {
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
+      <Footer />
     </BrowserRouter>
   );
 };
