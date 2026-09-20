@@ -225,6 +225,26 @@ export default function LogEvent(): JSX.Element {
             title: "Integrity Check Passed",
             description: `TIS Score: ${tisScore}% (≥40 required). Found ${mapped.length} differences.`,
           });
+          
+          // Automatically upload to IPFS if check passed
+          handlePinataUpload(afterImageFile)
+            .then((url) => {
+              setImageAngle1(url);
+              setUploadedImageFileAngle1(null);
+              setUploadedImagePreviewAngle1(null);
+              setIntegrityResultAngle1(null);
+              toast({
+                title: "Auto-Upload Success",
+                description: "Integrity check passed! Image uploaded to IPFS.",
+              });
+            })
+            .catch(() => {
+              toast({
+                title: "Upload Error",
+                description: "Check passed but IPFS upload failed. Please try manual URL entry.",
+                variant: "destructive",
+              });
+            });
         } else {
           toast({
             title: "Integrity Check Failed",
@@ -299,6 +319,26 @@ export default function LogEvent(): JSX.Element {
             title: "Integrity Check Passed",
             description: `TIS Score: ${tisScore}% (≥40 required). Found ${mapped.length} differences.`,
           });
+
+          // Automatically upload to IPFS if check passed
+          handlePinataUpload(afterImageFile)
+            .then((url) => {
+              setImageAngle2(url);
+              setUploadedImageFileAngle2(null);
+              setUploadedImagePreviewAngle2(null);
+              setIntegrityResultAngle2(null);
+              toast({
+                title: "Auto-Upload Success",
+                description: "Integrity check passed! Image uploaded to IPFS.",
+              });
+            })
+            .catch(() => {
+              toast({
+                title: "Upload Error",
+                description: "Check passed but IPFS upload failed. Please try manual URL entry.",
+                variant: "destructive",
+              });
+            });
         } else {
           toast({
             title: "Integrity Check Failed",
@@ -972,36 +1012,7 @@ export default function LogEvent(): JSX.Element {
                               </div>
                             </div>
 
-                            {integrityResultAngle1?.passed && (
-                              <Button
-                                onClick={async () => {
-                                  if (uploadedImageFileAngle1) {
-                                    try {
-                                      const url = await handlePinataUpload(uploadedImageFileAngle1);
-                                      setImageAngle1(url);
-                                      setUploadedImageFileAngle1(null);
-                                      setUploadedImagePreviewAngle1(null);
-                                      setIntegrityResultAngle1(null);
-                                      toast({
-                                        title: "Upload Success",
-                                        description: "Angle 1 image uploaded to IPFS.",
-                                      });
-                                    } catch {
-                                      toast({
-                                        title: "Upload Error",
-                                        description: "Failed to upload image to Pinata",
-                                        variant: "destructive",
-                                      });
-                                    }
-                                  }
-                                }}
-                                size="sm"
-                                className="gap-2"
-                              >
-                                <Upload className="h-4 w-4" />
-                                Upload Angle 1 to IPFS
-                              </Button>
-                            )}
+
                           </div>
                         )}
 
@@ -1140,36 +1151,7 @@ export default function LogEvent(): JSX.Element {
                               </div>
                             </div>
 
-                            {integrityResultAngle2?.passed && (
-                              <Button
-                                onClick={async () => {
-                                  if (uploadedImageFileAngle2) {
-                                    try {
-                                      const url = await handlePinataUpload(uploadedImageFileAngle2);
-                                      setImageAngle2(url);
-                                      setUploadedImageFileAngle2(null);
-                                      setUploadedImagePreviewAngle2(null);
-                                      setIntegrityResultAngle2(null);
-                                      toast({
-                                        title: "Upload Success",
-                                        description: "Angle 2 image uploaded to IPFS.",
-                                      });
-                                    } catch {
-                                      toast({
-                                        title: "Upload Error",
-                                        description: "Failed to upload image to Pinata",
-                                        variant: "destructive",
-                                      });
-                                    }
-                                  }
-                                }}
-                                size="sm"
-                                className="gap-2"
-                              >
-                                <Upload className="h-4 w-4" />
-                                Upload Angle 2 to IPFS
-                              </Button>
-                            )}
+
                           </div>
                         )}
 
@@ -1208,7 +1190,12 @@ export default function LogEvent(): JSX.Element {
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       {isContractBatch ? 'Logging to Blockchain...' : 'Logging Event...'}
                     </>
-                  ) : (uploadedImageFileAngle1 && !integrityResultAngle1?.passed) || (uploadedImageFileAngle2 && !integrityResultAngle2?.passed) ? (
+                  ) : (uploadedImageFileAngle1 && integrityResultAngle1 === null) || (uploadedImageFileAngle2 && integrityResultAngle2 === null) ? (
+                    <>
+                      <ShieldCheck className="mr-2 h-4 w-4" />
+                      Check Integrity Required
+                    </>
+                  ) : (uploadedImageFileAngle1 && integrityResultAngle1?.passed === false) || (uploadedImageFileAngle2 && integrityResultAngle2?.passed === false) ? (
                     <>
                       <ShieldCheck className="mr-2 h-4 w-4" />
                       TIS Score Too Low (Need ≥40%)

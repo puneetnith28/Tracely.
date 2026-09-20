@@ -167,6 +167,7 @@ def upload():
             timeout=60,
         )
         result = response.json()
+        print(f"DEBUG: Pinata v3 result: {result}", file=sys.stderr)
         if response.status_code == 200 and result.get('data', {}).get('cid'):
             cid = result['data']['cid']
             return jsonify({'url': f'https://ipfs.io/ipfs/{cid}', 'cid': cid})
@@ -251,11 +252,11 @@ def handle_user_profile():
             traceback.print_exc()
             return jsonify({'error': f'Server error during deletion: {str(e)}'}), 500
 
-@app.route('/api/analyze', methods=['POST', 'OPTIONS'])
+@app.route('/api/analyze_multipart', methods=['POST', 'OPTIONS'])
 @optional_auth
-def analyze_image():
+def analyze_image_multipart():
     """
-    Analyzes an image to detect product information using AI ensemble.
+    Analyzes an image to detect product information using AI ensemble (Multipart version).
     """
     if request.method == 'OPTIONS':
         return ('', 204)
@@ -695,7 +696,7 @@ def _analyze_pair(baseline_src: str, current_src: str, view_label: str) -> Dict[
         },
     }
 
-@app.route("/analyze", methods=["POST", "OPTIONS"])
+@app.route("/api/analyze", methods=["POST", "OPTIONS"])
 def analyze():
     try:
         if request.method == "OPTIONS":

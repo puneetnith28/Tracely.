@@ -10,7 +10,7 @@ export default defineConfig({
     proxy: {
       // All backend API calls
       "/api": {
-        target: "http://127.0.0.1:5001",
+        target: "http://127.0.0.1:5000",
         changeOrigin: true,
       },
     },
