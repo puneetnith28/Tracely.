@@ -56,15 +56,15 @@ export class Web3Service {
       this.signer = await this.provider.getSigner();
       
       // Ensure contract address is a valid checksummed address (prevents ENS resolution)
+      // Use the first address in the array for general contract interactions
+      const primaryAddress = Array.isArray(CONTRACT_ADDRESS) ? CONTRACT_ADDRESS[0] : CONTRACT_ADDRESS;
       let contractAddress: string;
       try {
-        contractAddress = ethers.getAddress(CONTRACT_ADDRESS);
+        contractAddress = ethers.getAddress(primaryAddress);
       } catch {
-        // If getAddress fails, use the address as-is (shouldn't happen with valid address)
-        contractAddress = CONTRACT_ADDRESS;
+        contractAddress = primaryAddress;
       }
       
-      // Initialize contract with explicit hex address (no ENS resolution)
       this.contract = new ethers.Contract(contractAddress, CONTRACT_ABI, this.signer);
       
       // Get address directly without ENS resolution
@@ -132,12 +132,26 @@ export class Web3Service {
   }
 
   async isUserAuthorized(address: string): Promise<boolean> {
-    if (!this.contract) throw new Error('Contract not initialized');
-    // Ensure address is a valid hex address (not ENS) to prevent resolution errors
+    if (!this.contract || !this.signer) throw new Error('Contract not initialized');
+    
     const normalizedAddress = ethers.isAddress(address) 
       ? ethers.getAddress(address) 
       : address;
-    return await this.contract.isUserAuthorized(normalizedAddress);
+
+    const addresses = Array.isArray(CONTRACT_ADDRESS) ? CONTRACT_ADDRESS : [CONTRACT_ADDRESS];
+    
+    // Check authorization across all provided contract addresses
+    for (const contractAddr of addresses) {
+      try {
+        const contract = new ethers.Contract(contractAddr, CONTRACT_ABI, this.signer);
+        const authorized = await contract.authorizedUsers(normalizedAddress);
+        if (authorized) return true;
+      } catch (err) {
+        console.error(`Error checking auth for contract ${contractAddr}:`, err);
+      }
+    }
+    
+    return false;
   }
 
   // Contract Functions
