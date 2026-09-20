@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Auth0Provider } from "@auth0/auth0-react";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider, AUTH0_CONFIG, useAuth } from "@/contexts/AuthContext";
-import { InsForgeAuthProvider } from "@/contexts/InsForgeAuthContext";
 import { Navbar } from "@/components/Navbar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
@@ -16,9 +15,7 @@ import LogEvent from "./pages/LogEvent";
 import Verify from "./pages/Verify";
 import IntegrityCheck from "./pages/IntegrityCheck";
 import Login from "./pages/Login";
-import Login2 from "./pages/Login2";
 import { AuthCallback } from "./components/AuthCallback";
-import { InsForgeAuthCallback } from "./components/InsForgeAuthCallback";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,9 +28,7 @@ const AppRoutes = () => {
       <Navbar />
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/login2" element={<Login2 />} />
         <Route path="/callback" element={<AuthCallback />} />
-        <Route path="/login2/callback" element={<InsForgeAuthCallback />} />
         <Route path="/" element={<Index />} />
         <Route
           path="/admin"
@@ -79,13 +74,11 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          <InsForgeAuthProvider>
-            <TooltipProvider>
+          <TooltipProvider>
               <Toaster />
               <Sonner />
               <AppRoutes />
-            </TooltipProvider>
-          </InsForgeAuthProvider>
+          </TooltipProvider>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>

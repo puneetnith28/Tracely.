@@ -24,6 +24,7 @@ interface AuthContextType {
   loginWithRedirect: (options?: any) => Promise<void>;
   logout: (options?: any) => void;
   getAccessTokenSilently: () => Promise<string>;
+  loginWithPassword: (email: string, isSignup?: boolean) => Promise<void>;
   loginWithSocial: (connection: string, isSignup?: boolean) => Promise<void>;
   loginWithPasswordless: (email: string, isSignup?: boolean) => Promise<void>;
 }
@@ -129,6 +130,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const loginWithPassword = async (email: string, isSignup: boolean = false) => {
+    await loginWithRedirect({
+      authorizationParams: {
+        connection: 'Username-Password-Authentication',
+        login_hint: email,
+        ...(AUTH0_DOMAIN && { audience: AUTH0_AUDIENCE }),
+        scope: 'openid profile email offline_access',
+        ...(isSignup && { screen_hint: 'signup' }),
+      },
+      appState: {
+        returnTo: window.location.origin,
+      },
+    });
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -138,6 +154,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         loginWithRedirect,
         logout,
         getAccessTokenSilently: getAuthToken,
+        loginWithPassword,
         loginWithSocial,
         loginWithPasswordless,
       }}

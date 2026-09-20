@@ -24,17 +24,17 @@ export const AuthCallback = () => {
         const auth0Error = error as Auth0Error;
         let errorMessage = error.message || "Authentication failed";
         
-        // Check for connection not enabled error
-        if (auth0Error.error === 'invalid_request' || 
-            error.message?.includes('connection') || 
+        // Map specific Auth0 error types to user-friendly messages
+        if (auth0Error.error === 'access_denied') {
+          errorMessage = "Access denied. Please check your Auth0 application settings and ensure the connection is properly configured.";
+        } else if (auth0Error.error === 'invalid_request' ||
+            error.message?.includes('connection') ||
             error.message?.includes('not enabled') ||
             auth0Error.error_description?.includes('connection')) {
-          errorMessage = "Passwordless email connection is not enabled. Please enable it in Auth0 Dashboard: Applications → My App → Connections → Enable 'Email (Passwordless)'";
+          errorMessage = `Authentication connection error: ${auth0Error.error_description || error.message}. Please verify your Auth0 Dashboard connection settings.`;
         } else if (error.message?.includes('email') || 
-                   error.message?.includes('sending') || 
-                   auth0Error.error_description?.includes('email') ||
-                   auth0Error.error_description?.includes('sending')) {
-          errorMessage = "Auth0 email service is not configured. Please configure email sending in Auth0 Dashboard: Branding → Email Provider → Set up SMTP. See FIX_AUTH0_EMAIL_SENDING.md for details.";
+                   auth0Error.error_description?.includes('email')) {
+          errorMessage = `Email configuration error: ${auth0Error.error_description || error.message}`;
         }
         
         navigate("/login", { 

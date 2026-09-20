@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useInsForgeAuth } from "@/contexts/InsForgeAuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +11,7 @@ import { Loader2, Mail, Lock, ArrowRight } from "lucide-react";
 const Login2 = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signIn, signUp, signInWithOAuth, isAuthenticated, isLoading } = useInsForgeAuth();
+  const { loginWithPassword, loginWithSocial, isAuthenticated, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -51,21 +51,8 @@ const Login2 = () => {
     setErrorMessage(null);
 
     try {
-      if (activeTab === "signup") {
-        const { error } = await signUp(email, password);
-        if (error) {
-          setErrorMessage(error.message || "Sign up failed. Please try again.");
-        } else {
-          navigate("/", { replace: true });
-        }
-      } else {
-        const { error } = await signIn(email, password);
-        if (error) {
-          setErrorMessage(error.message || "Sign in failed. Please check your credentials.");
-        } else {
-          navigate("/", { replace: true });
-        }
-      }
+      await loginWithPassword(email, activeTab === "signup");
+      // Auth0 will redirect after login, no need to navigate manually
     } catch (error: any) {
       setErrorMessage(error.message || "An error occurred. Please try again.");
     } finally {
@@ -78,8 +65,9 @@ const Login2 = () => {
     setErrorMessage(null);
 
     try {
-      await signInWithOAuth(provider);
-      // OAuth will redirect, so we don't need to navigate here
+      // Map provider names to Auth0 connection names
+      const connection = provider === "google" ? "google-oauth2" : "github";
+      await loginWithSocial(connection, false);
     } catch (error: any) {
       setErrorMessage(error.message || `Failed to sign in with ${provider}. Please try again.`);
       setIsSubmitting(false);
