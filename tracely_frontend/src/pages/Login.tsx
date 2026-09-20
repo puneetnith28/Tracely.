@@ -22,12 +22,15 @@ const Login = () => {
 
   const roles: UserRole[] = ["MANUFACTURER", "DISTRIBUTOR", "WAREHOUSE", "DELIVERY_PERSON"];
 
-  // Check for error in location state
+  // Check for error or tab in location state
   useEffect(() => {
     if (location.state?.error) {
       setErrorMessage(location.state.error);
       // Clear the error from state
       window.history.replaceState({}, document.title);
+    }
+    if (location.state?.tab === "signup" || location.state?.tab === "login") {
+      setActiveTab(location.state.tab);
     }
   }, [location.state]);
 

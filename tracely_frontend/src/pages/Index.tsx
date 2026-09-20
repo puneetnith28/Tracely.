@@ -1,463 +1,212 @@
-// src/pages/Index.tsx
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { motion, useMotionValue, useTransform } from "framer-motion";
-import {
-  Package,
-  Scan,
-  ShieldCheck,
-  Sparkles,
-  ArrowRight,
-  Zap,
-  Globe,
-  Lock,
-  Star,
-} from "lucide-react";
-import { Box3D } from "@/components/Box3D";
-import Cubes from "@/components/Cubes";
-import { GlassCard } from "@/components/GlassCard";
-import { QRScanAnimator } from "@/components/QRScanAnimator";
-import { Walkthrough } from "@/components/Walkthrough";
-import ParticleField from "@/components/ParticleField";
-import FloatingElements from "@/components/FloatingElements";
-import GradientBackground from "@/components/GradientBackground";
-import AnimatedText, { TypewriterText } from "@/components/AnimatedText";
-import InteractiveCard from "@/components/InteractiveCard";
-import { useState, useRef } from "react";
-
-/**
- * Final enhanced Index page
- * - Uses framer-motion for tilt effect (no extra dependency)
- * - Compact hero copy, strong CTA
- * - Right visual tile preserved (Cubes)
- * - Rest of sections intact and responsive
- */
+import { motion } from "framer-motion";
+import { Package, Scan, ShieldCheck, ArrowRight, Zap, Globe, Lock } from "lucide-react";
+import { BlackHole } from "@/components/BlackHole";
 
 const Index = () => {
   const navigate = useNavigate();
-  const [showTimeline, setShowTimeline] = useState(false);
-
-  // small interactive tilt values (framer-motion) — no external tilt lib needed
-  const cardRef = useRef<HTMLDivElement | null>(null);
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const rotateY = useTransform(mouseX, [-100, 100], [12, -12]);
-  const rotateX = useTransform(mouseY, [-100, 100], [-8, 8]);
-  const shadowX = useTransform(mouseX, [-100, 100], [-40, 40]);
-  const shadowY = useTransform(mouseY, [-100, 100], [-30, 30]);
-
-  const handleMove = (e: React.MouseEvent) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = e.clientX - (rect.left + rect.width / 2);
-    const y = e.clientY - (rect.top + rect.height / 2);
-    // normalize approx to -100..100
-    const nx = Math.max(-120, Math.min(120, (x / (rect.width / 2)) * 100));
-    const ny = Math.max(-120, Math.min(120, (y / (rect.height / 2)) * 100));
-    mouseX.set(nx);
-    mouseY.set(ny);
-  };
-
-  const handleLeave = () => {
-    mouseX.set(0);
-    mouseY.set(0);
-  };
-
-  const handleScanComplete = () => {
-    setShowTimeline(true);
-    setTimeout(() => setShowTimeline(false), 4500);
-  };
-
-  const walkthroughSteps = [
-    {
-      target: "try-it-out-btn",
-      title: "Try It Out",
-      description:
-        "Create a batch, generate a QR and experience verification end-to-end",
-      position: "bottom" as const,
-    },
-    {
-      target: "simulate-scan-btn",
-      title: "Simulate QR Scan",
-      description: "Experience the scanning animation and see timeline preview",
-      position: "top" as const,
-    },
-  ];
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      <Walkthrough steps={walkthroughSteps} storageKey="home-walkthrough" />
+    <div className="min-h-screen bg-[#0c0c0e] text-slate-200 overflow-hidden font-sans selection:bg-primary/30 selection:text-white">
+      {/* Hero Section */}
+      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 px-4 flex flex-col items-center text-center">
+        {/* Cosmic Background Glow */}
+        {/* Cosmic Background Glow */}
+        <BlackHole />
 
-      {/* Decorative backgrounds */}
-      <GradientBackground />
-      <ParticleField />
-      <FloatingElements />
-
-      {/* HERO */}
-      <section className="container mx-auto px-4 md:px-6 py-12 md:py-20 relative z-20">
-        <div className="grid gap-8 lg:grid-cols-2 items-center">
-          {/* LEFT: concise, bold */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7 }}
-            className="max-w-2xl"
-          >
-            <div className="inline-flex items-center gap-3 rounded-full px-3 py-2 bg-slate-800/80 dark:bg-white/10 backdrop-blur-sm border border-slate-700/50">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-sm font-semibold text-slate-100 dark:text-slate-200">
-                Next-Gen Supply Chain Verification
-              </span>
-            </div>
-
-            <h1 className="mt-6 text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-tight">
-              <span className="block bg-clip-text text-transparent bg-gradient-to-r from-primary to-indigo-500">
-                Tracely
-              </span>
-              <span className="block mt-2 text-slate-900 dark:text-slate-100">
-                Trust what you track — Scan. Verify. Believe.
-              </span>
-            </h1>
-
-            <p className="mt-4 text-lg text-slate-600 dark:text-slate-300 max-w-lg">
-              Assign a QR-backed digital identity, capture baseline photos,
-              verify each handoff with explainable AI, and persist proofs on a
-              tamper-proof ledger.
-            </p>
-
-            <div className="mt-6 flex flex-wrap gap-3 items-center">
-              <Button
-                id="try-it-out-btn"
-                size="lg"
-                className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-primary to-indigo-500 shadow-lg hover:scale-[1.01] transition-transform"
-                onClick={() => navigate("/admin")}
-              >
-                Try it out
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-
-              <Button
-                id="simulate-scan-btn"
-                size="lg"
-                variant="outline"
-                className="px-5 py-3"
-                onClick={() => navigate("/verify")}
-              >
-                Verify Batch
-              </Button>
-
-              <div className="ml-2 text-sm text-slate-500 dark:text-slate-400">
-                <span className="font-medium">No hardware •</span> mobile-first
-              </div>
-            </div>
-
-            {/* short badges */}
-            <div className="mt-6 flex flex-wrap gap-3">
-              {[
-                { icon: Globe, label: "Global" },
-                { icon: Lock, label: "Secure" },
-                { icon: Package, label: "Provenance" },
-                { icon: Scan, label: "Instant" },
-              ].map((b) => (
-                <div
-                  key={b.label}
-                  className="flex items-center gap-2 rounded-lg px-3 py-1.5 bg-slate-800/80 dark:bg-white/10 border border-slate-700/50 text-sm"
-                >
-                  <b.icon className="w-4 h-4 text-primary" />
-                  <span className="text-slate-100 dark:text-slate-200">
-                    {b.label}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* RIGHT: interactive visual tile (tilt via framer-motion) */}
-          <motion.div
-            ref={cardRef}
-            onMouseMove={handleMove}
-            onMouseLeave={handleLeave}
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7 }}
-            className="flex justify-center"
-          >
-            <motion.div
-              style={{
-                rotateY,
-                rotateX,
-                boxShadow: "0px 10px 30px rgba(16,24,40,0.12)",
-                translateZ: 0,
-              }}
-              transition={{ type: "spring", stiffness: 160, damping: 18 }}
-              className="w-full max-w-[520px] rounded-2xl"
-            >
-              <div
-                className="relative rounded-2xl overflow-hidden border border-white/10 dark:border-white/6
-                           shadow-2xl bg-white/70 dark:bg-gradient-to-b dark:from-[#071029] dark:via-[#071023] dark:to-[#071022] p-4"
-              >
-                {/* Top meta row */}
-                <div className="flex items-center justify-between px-3 py-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-md bg-gradient-to-br from-primary to-indigo-500 flex items-center justify-center text-white font-bold">
-                      BT
-                    </div>
-                    <div>
-                      <div className="text-xs font-semibold text-slate-800 dark:text-slate-200">
-                        CHT-001-ABC
-                      </div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400">
-                        VitaTabs • Batch
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="text-xs text-slate-500 dark:text-slate-400">
-                    Last: 4h
-                  </div>
-                </div>
-
-                {/* Main visual */}
-                <div className="mt-3 px-3 pb-4">
-                  <div className="relative rounded-xl overflow-hidden p-3 bg-gradient-to-br from-white/60 to-white/20 dark:from-black/40 dark:via-black/30">
-                    {/* live badge */}
-                    <div className="absolute left-3 top-3 text-xs bg-slate-800/80 dark:bg-white/10 backdrop-blur-sm rounded-md px-2 py-1 text-slate-100 dark:text-slate-100 border border-slate-700/50">
-                      Live Demo
-                    </div>
-
-                    <div className="flex items-center justify-center h-[220px] md:h-[260px]">
-                      <Cubes
-                        gridSize={7}
-                        maxAngle={45}
-                        radius={3.2}
-                        borderStyle="1px solid rgba(82,39,255,0.9)"
-                        faceColor="transparent"
-                        rippleColor="#6EE7B7"
-                        rippleSpeed={1.1}
-                        autoAnimate={true}
-                        rippleOnClick={true}
-                      />
-                    </div>
-
-                    {/* bottom row status + actions */}
-                    <div className="mt-2 flex items-center justify-between">
-                      <div>
-                        <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                          Integrity: <span className="text-green-600">89</span>
-                          <span className="text-slate-500 text-xs ml-2">
-                            TIS
-                          </span>
-                        </div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">
-                          Last: QuickShip • Verified
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <button
-                          className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-primary/90 text-white text-sm shadow"
-                          onClick={() => navigate("/verify")}
-                        >
-                          <Scan className="w-4 h-4" /> Verify
-                        </button>
-
-                        <button
-                          className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-white/30 dark:bg-white/5 border border-white/6 text-sm text-slate-800 dark:text-slate-200"
-                          onClick={() => navigate("/admin")}
-                        >
-                          View
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* QR Scan Simulator */}
-      <section className="container mx-auto px-4 py-12 relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 26 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          className="flex flex-col items-center space-y-8"
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="relative z-10 max-w-3xl"
         >
-          <div className="text-center space-y-4">
-            <h2 className="text-3xl md:text-4xl font-bold">
-              <span className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
-                Try It Now
-              </span>
-            </h2>
-            <p className="text-muted-foreground max-w-2xl text-lg">
-              Experience our QR scanning technology with this interactive demo
-            </p>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-sm md:text-base text-slate-300 mb-8 backdrop-blur-md">
+            <span className="w-2 h-2 rounded-full bg-primary" />
+            Next-Gen Supply Chain Verification
           </div>
 
-          <div className="w-full max-w-md">
-            <QRScanAnimator onScanComplete={handleScanComplete} />
-          </div>
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6 leading-tight drop-shadow-[0_4px_24px_rgba(0,0,0,1)]">
+            Trust what you <br className="hidden md:block" /> track with Tracely
+          </h1>
 
-          {showTimeline && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="w-full max-w-md p-4 bg-card/50 backdrop-blur-sm border border-primary/30 rounded-lg"
+          <p className="text-lg md:text-xl text-slate-400 mb-10 max-w-2xl mx-auto font-light">
+            Assign a QR-backed digital identity, capture baseline photos, verify each handoff, and persist proofs on a tamper-proof ledger.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Button
+              size="lg"
+              className="rounded-full bg-primary hover:bg-primary/90 text-white px-8 h-12 text-base font-medium shadow-[0_0_20px_rgba(138,92,246,0.3)] transition-all hover:shadow-[0_0_30px_rgba(138,92,246,0.5)]"
+              onClick={() => navigate("/admin")}
             >
-              <p className="text-sm text-muted-foreground mb-2">
-                Preview Timeline:
-              </p>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="w-2 h-2 rounded-full bg-green-500" />
-                  SwiftCargo - Dispatched
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="w-2 h-2 rounded-full bg-green-500" />
-                  MegaMart - Verified intact
-                </div>
-              </div>
-            </motion.div>
-          )}
+              Start tracking
+              <ArrowRight className="ml-2 w-4 h-4" />
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="rounded-full bg-transparent hover:bg-white/5 text-white border-white/10 px-8 h-12 text-base font-medium transition-colors"
+              onClick={() => navigate("/verify")}
+            >
+              Verify a product
+            </Button>
+          </div>
         </motion.div>
       </section>
 
-      {/* How it works (3 cards) */}
-      <section className="container mx-auto px-4 py-12 md:py-20 relative z-10">
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <h2 className="text-3xl md:text-5xl font-bold text-center mb-4">
-            <span className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
-              How it works
-            </span>
-          </h2>
-          <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto text-lg">
-            Three simple steps to run provenance verification
-          </p>
+      {/* Feature Grid / Core functionalities (Reflect App Style) */}
+      <section className="py-24 px-4 relative z-10 border-t border-white/5 bg-gradient-to-b from-[#0c0c0e] to-black">
+        <div className="container mx-auto max-w-5xl">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
+              Give your supply chain superpowers
+            </h2>
+            <p className="text-slate-400 text-lg">
+              Mirror the physical journey with cryptographic certainty.
+            </p>
+          </div>
 
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid md:grid-cols-3 gap-6">
             {[
               {
                 icon: Package,
-                title: "Create",
-                desc: "Register batch & generate QR",
-                detail:
-                  "Add product details, baseline photos, and a verifiable digital identity.",
-                color: "from-green-500 to-emerald-500",
+                title: "Create & Register",
+                desc: "Register a batch and generate a unique QR code. Add baseline product photos for later visual comparison.",
               },
               {
                 icon: Scan,
-                title: "Scan & Log",
-                desc: "Every handoff captured",
-                detail:
-                  "Actors upload photos + notes; events are hashed & recorded.",
-                color: "from-blue-500 to-cyan-500",
+                title: "Scan & Log Events",
+                desc: "Every handoff is captured. Supply chain actors upload photos and notes, securely hashed to the ledger.",
               },
               {
                 icon: ShieldCheck,
-                title: "Verify",
-                desc: "Consumer + Regulator Trust",
-                detail: "Scan QR to see journey, TIS & cryptographic proofs.",
-                color: "from-purple-500 to-pink-500",
-              },
-            ].map((s, i) => (
+                title: "Instant Verification",
+                desc: "Consumers and regulators simply scan the QR to see product journey, compliance proofs, and trust score.",
+              }
+            ].map((f, i) => (
               <motion.div
-                key={s.title}
-                initial={{ opacity: 0, y: 30 }}
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.12 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ delay: i * 0.1, duration: 0.6 }}
+                className="bg-white/[0.02] border border-white/5 rounded-2xl p-8 hover:bg-white/[0.04] transition-colors relative group overflow-hidden"
               >
-                <InteractiveCard delay={i * 0.12}>
-                  <GlassCard className="h-full">
-                    <div className="p-6 text-center">
-                      <div
-                        className={`mx-auto w-16 h-16 rounded-full bg-gradient-to-br ${s.color} flex items-center justify-center mb-4`}
-                      >
-                        <s.icon className="w-8 h-8 text-white" />
-                      </div>
-                      <h3 className="text-xl font-bold mb-2">{s.title}</h3>
-                      <p className="text-primary font-medium mb-2">{s.desc}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {s.detail}
-                      </p>
-                    </div>
-                  </GlassCard>
-                </InteractiveCard>
+                <div className="absolute top-0 right-0 p-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="w-24 h-24 bg-primary/20 blur-[40px] rounded-full" />
+                </div>
+                <div className="w-12 h-12 rounded-full border border-white/10 bg-white/5 flex items-center justify-center mb-6 relative z-10 transition-colors group-hover:border-primary/50">
+                  <f.icon className="w-5 h-5 text-slate-300 group-hover:text-primary transition-colors" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-3 relative z-10">{f.title}</h3>
+                <p className="text-slate-400 relative z-10 font-light leading-relaxed">{f.desc}</p>
               </motion.div>
             ))}
           </div>
-        </motion.div>
+        </div>
       </section>
 
-      {/* Features + CTA */}
-      <section className="container mx-auto px-4 py-12 md:py-20 relative z-10">
-        <div className="grid gap-8 lg:grid-cols-2 items-center">
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Tracely?</h2>
-            <p className="text-muted-foreground mb-6 max-w-xl">
-              Explainable AI, blockchain anchoring, and consumer-facing
-              transparency — all in a mobile-first package.
-            </p>
+      {/* Vertical list feature area */}
+      <section className="py-24 px-4 relative z-10">
+        <div className="container mx-auto max-w-5xl">
+          <div className="grid md:grid-cols-2 gap-16 items-center">
+            <div>
+              <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight">
+                What can you do with Tracely?
+              </h2>
+              <p className="text-slate-400 text-lg font-light mb-12">
+                Bring unprecedented transparency to any global supply chain operation without the need for complex hardware.
+              </p>
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              {[
-                { icon: Zap, title: "Lightning Fast" },
-                { icon: ShieldCheck, title: "Bank-Level Security" },
-                { icon: Globe, title: "Global Reach" },
-                { icon: Star, title: "Easy Integration" },
-              ].map((f) => (
-                <div
-                  key={f.title}
-                  className="flex items-center gap-3 bg-slate-800/80 dark:bg-white/10 rounded-lg px-4 py-3 border border-slate-700/50"
-                >
-                  <f.icon className="w-6 h-6 text-primary" />
-                  <div>
-                    <div className="font-semibold text-slate-100 dark:text-slate-200">{f.title}</div>
-                    <div className="text-sm text-slate-300 dark:text-slate-400">
-                      Trusted by supply chain operators
+              <div className="space-y-10">
+                {[
+                  {
+                    icon: Globe,
+                    title: "Global Supply Chains",
+                    desc: "Track items across borders with a unified, tamper-proof system."
+                  },
+                  {
+                    icon: Lock,
+                    title: "Cryptographic Trust",
+                    desc: "No more forged documents. Everything is mathematically verified."
+                  },
+                  {
+                    icon: Zap,
+                    title: "Lightning Fast Audits",
+                    desc: "Generate compliance reports and audit trails in seconds."
+                  }
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-5 group">
+                    <div className="mt-1">
+                      <div className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center group-hover:border-primary/50 transition-colors">
+                        <item.icon className="w-4 h-4 text-slate-300 group-hover:text-primary transition-colors" />
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-semibold text-white mb-2">{item.title}</h4>
+                      <p className="text-slate-400 font-light leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="relative mt-12 md:mt-0">
+              <div className="absolute -inset-10 bg-primary/20 blur-[100px] rounded-full" />
+              <div className="relative border border-white/10 bg-black/50 backdrop-blur-xl rounded-2xl p-8 shadow-2xl">
+                {/* Mock UI for Visual Interest */}
+                <div className="flex items-center justify-between border-b border-white/10 pb-6 mb-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-indigo-500 flex items-center justify-center text-sm font-bold text-white shadow-lg">TR</div>
+                    <div>
+                      <div className="text-base font-medium text-white">Batch #HT-1029</div>
+                      <div className="text-sm text-slate-400">Verified Origin</div>
+                    </div>
+                  </div>
+                  <div className="px-3 py-1.5 rounded-full bg-green-500/10 text-green-400 text-xs font-semibold border border-green-500/20 tracking-wider">
+                    SECURE
+                  </div>
+                </div>
+
+                <div className="space-y-6 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-px before:bg-white/10">
+                  <div className="flex gap-4 items-start relative">
+                    <div className="w-4 h-4 rounded-full bg-primary mt-1 flex-shrink-0 shadow-[0_0_10px_rgba(138,92,246,0.5)] z-10" />
+                    <div>
+                      <div className="text-base font-medium text-slate-200">Manufactured at Facility A</div>
+                      <div className="text-sm text-slate-500 mt-1">Oct 12, 10:00 AM • GPS: 34.05, -118.24</div>
+                    </div>
+                  </div>
+                  <div className="flex gap-4 items-start relative">
+                    <div className="w-4 h-4 rounded-full bg-primary mt-1 flex-shrink-0 shadow-[0_0_10px_rgba(138,92,246,0.5)] z-10" />
+                    <div>
+                      <div className="text-base font-medium text-slate-200">Quality Assured & Sealed</div>
+                      <div className="text-sm text-slate-500 mt-1">Oct 13, 08:30 AM • Inspector ID: 492</div>
+                    </div>
+                  </div>
+                  <div className="flex gap-4 items-start relative">
+                    <div className="w-4 h-4 rounded-full border-2 border-slate-600 bg-[#0c0c0e] mt-1 flex-shrink-0 z-10" />
+                    <div>
+                      <div className="text-base font-medium text-slate-500">In Transit to Warehouse Hub</div>
+                      <div className="text-sm text-slate-600 mt-1">Pending Arrival</div>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="text-center">
-            <div className="mb-6">
-              <h3 className="text-2xl font-bold">Ready to build trust?</h3>
-              <p className="text-muted-foreground">
-                Start tracking products and reduce fraud with visual
-                verification.
-              </p>
-            </div>
-
-            <div className="flex justify-center gap-4">
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-primary to-blue-500"
-                onClick={() => navigate("/admin")}
-              >
-                Get Started
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => navigate("/verify")}
-              >
-                View Demo
-              </Button>
+              </div>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="border-t border-white/5 py-12 px-4 text-center mt-20 bg-black/20">
+        <p className="text-slate-500 text-sm">© {new Date().getFullYear()} Tracely. All rights reserved.</p>
+        <div className="mt-4 flex justify-center gap-4 text-sm text-slate-600">
+          <span className="hover:text-slate-400 cursor-pointer transition-colors">Privacy Policy</span>
+          <span>•</span>
+          <span className="hover:text-slate-400 cursor-pointer transition-colors">Terms of Service</span>
+        </div>
+      </footer>
     </div>
   );
 };

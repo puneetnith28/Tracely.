@@ -28,7 +28,7 @@ const AppRoutes = () => {
 
   return (
     <BrowserRouter>
-      {isAuthenticated && <Navbar />}
+      <Navbar />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/login2" element={<Login2 />} />

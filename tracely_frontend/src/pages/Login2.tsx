@@ -18,11 +18,14 @@ const Login2 = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Check for error in location state
+  // Check for error or tab in location state
   useEffect(() => {
     if (location.state?.error) {
       setErrorMessage(location.state.error);
       window.history.replaceState({}, document.title);
+    }
+    if (location.state?.tab === "signup" || location.state?.tab === "login") {
+      setActiveTab(location.state.tab);
     }
   }, [location.state]);
 
