@@ -1,7 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Moon, Sun, Menu, X, LogOut, User } from 'lucide-react';
-import { useTheme } from '@/contexts/ThemeContext';
+import { Menu, X, LogOut, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -18,7 +17,6 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export const Navbar = () => {
-  const { theme, toggleTheme } = useTheme();
   const { isAuthenticated, user, logout } = useAuth();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -32,13 +30,13 @@ export const Navbar = () => {
   ];
 
   return (
-    <nav className="border-b bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+    <nav className="border-b border-white/5 bg-background/50 backdrop-blur-xl sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <Logo size="md" className="text-primary" />
-            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
+            <Logo size="md" className="text-white" />
+            <span className="text-2xl font-bold text-white tracking-tight">
               Tracely
             </span>
           </Link>
@@ -50,34 +48,30 @@ export const Navbar = () => {
                 key={link.path}
                 to={link.path}
                 className={cn(
-                  "relative text-sm font-medium transition-colors hover:text-primary group",
-                  location.pathname === link.path ? "text-primary" : "text-foreground/80"
+                  "relative text-sm font-medium transition-colors hover:text-white group",
+                  location.pathname === link.path ? "text-white" : "text-muted-foreground"
                 )}
               >
                 {link.label}
-                <span className={cn(
-                  "absolute -bottom-1 left-0 h-0.5 bg-primary transition-all",
-                  location.pathname === link.path ? "w-full" : "w-0 group-hover:w-full"
-                )} />
               </Link>
             ))}
           </div>
 
-          {/* Auth & Theme Toggle */}
-          <div className="flex items-center gap-2">
+          {/* Auth */}
+          <div className="flex items-center gap-4">
             {isAuthenticated && user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                    <Avatar className="h-10 w-10">
-                      <AvatarFallback className="bg-primary text-primary-foreground">
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-white/10">
+                    <Avatar className="h-10 w-10 border border-white/10">
+                      <AvatarFallback className="bg-primary/20 text-primary">
                         {user.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>
+                <DropdownMenuContent align="end" className="w-56 bg-background/95 backdrop-blur-md border-white/10">
+                  <DropdownMenuLabel className="text-white">
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium leading-none">{user.name || 'User'}</p>
                       <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
@@ -86,42 +80,30 @@ export const Navbar = () => {
                       </p>
                     </div>
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => logout()}>
+                  <DropdownMenuSeparator className="bg-white/10" />
+                  <DropdownMenuItem onClick={() => logout()} className="text-white focus:bg-white/10">
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Log out</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Link to="/login">
-                <Button variant="outline" size="sm">
-                  <User className="mr-2 h-4 w-4" />
-                  Log In
-                </Button>
-              </Link>
+              <div className="hidden md:flex items-center gap-4">
+                <Link to="/login" state={{ tab: "login" }} className="text-sm font-medium text-muted-foreground hover:text-white transition-colors">
+                  Login
+                </Link>
+                <Link to="/login" state={{ tab: "signup" }}>
+                  <Button className="bg-primary hover:bg-primary/90 text-white rounded-full px-5 h-9 text-sm font-medium shadow-[0_0_15px_rgba(138,92,246,0.3)]">
+                    Sign up
+                  </Button>
+                </Link>
+              </div>
             )}
 
             <Button
               variant="ghost"
               size="icon"
-              onClick={toggleTheme}
-              aria-label="Toggle theme"
-              className="relative overflow-hidden"
-            >
-              <motion.div
-                initial={false}
-                animate={{ rotate: theme === 'dark' ? 180 : 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-              </motion.div>
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
+              className="md:hidden text-white hover:bg-white/10"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
             >
@@ -137,7 +119,7 @@ export const Navbar = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden py-4 space-y-2 overflow-hidden"
+              className="md:hidden py-4 space-y-2 overflow-hidden border-t border-white/5"
             >
               {navLinks.map(link => (
                 <Link
@@ -147,13 +129,33 @@ export const Navbar = () => {
                   className={cn(
                     "block px-4 py-2 rounded-md text-sm font-medium transition-colors",
                     location.pathname === link.path 
-                      ? "bg-primary text-primary-foreground" 
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      ? "bg-white/10 text-white" 
+                      : "text-muted-foreground hover:bg-white/5 hover:text-white"
                   )}
                 >
                   {link.label}
                 </Link>
               ))}
+              {!isAuthenticated && (
+                <div className="pt-4 border-t border-white/5 flex flex-col gap-2">
+                  <Link
+                    to="/login"
+                    state={{ tab: "login" }}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-4 py-2 rounded-md text-sm font-medium text-muted-foreground hover:bg-white/5 hover:text-white"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/login"
+                    state={{ tab: "signup" }}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-4 py-2 rounded-md text-sm font-medium text-primary hover:bg-primary/10"
+                  >
+                    Sign up
+                  </Link>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
