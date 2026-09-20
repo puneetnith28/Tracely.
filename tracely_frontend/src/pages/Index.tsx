@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Package, Scan, ShieldCheck, ArrowRight, Zap, Globe, Lock } from "lucide-react";
 import { BlackHole } from "@/components/BlackHole";
+import { GridBackground } from "@/components/GridBackground";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -56,8 +57,9 @@ const Index = () => {
       </section>
 
       {/* Feature Grid / Core functionalities (Reflect App Style) */}
-      <section className="py-24 px-4 relative z-10 border-t border-white/5 bg-gradient-to-b from-[#0c0c0e] to-black">
-        <div className="container mx-auto max-w-5xl">
+      <GridBackground>
+        <section className="py-24 px-4 relative z-10 border-t border-white/5">
+          <div className="container mx-auto max-w-5xl">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
               Give your supply chain superpowers
@@ -197,6 +199,7 @@ const Index = () => {
           </div>
         </div>
       </section>
+      </GridBackground>
 
       {/* Footer */}
       <footer className="border-t border-white/5 py-12 px-4 text-center mt-20 bg-black/20">
