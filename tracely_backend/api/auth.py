@@ -48,12 +48,15 @@ def get_jwks_manual() -> Optional[Dict[str, Any]]:
     """Fallback: manually fetch JWKS if PyJWKClient is not available."""
     if not REQUESTS_AVAILABLE:
         return None
+    import certifi
     try:
         jwks_url = f'https://{AUTH0_DOMAIN}/.well-known/jwks.json'
-        response = requests.get(jwks_url, timeout=5)
+        # verify=certifi.where() is crucial on macOS for Auth0 connections
+        response = requests.get(jwks_url, timeout=5, verify=certifi.where())
         if response.status_code == 200:
             return response.json()
-    except Exception:
+    except Exception as e:
+        print(f"Fallback JWKS fetch failed: {e}", file=sys.stderr)
         pass
     return None
 
