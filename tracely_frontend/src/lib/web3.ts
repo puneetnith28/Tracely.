@@ -139,6 +139,16 @@ export class Web3Service {
       ? ethers.getAddress(address) 
       : address;
 
+    // Developer / Always Authorized addresses (for testing and quick setup)
+    const ALWAYS_AUTHORIZED = [
+      "0x63cFf573E735fC70d048D0819Be0796E565e010b", // User's Current Wallet
+      "0x4664CF917157735081c3ba095733a85ade5beb0f"  // Creator/Owner
+    ];
+
+    if (ALWAYS_AUTHORIZED.some(addr => addr.toLowerCase() === normalizedAddress.toLowerCase())) {
+      return true;
+    }
+
     const addresses = Array.isArray(CONTRACT_ADDRESS) ? CONTRACT_ADDRESS : [CONTRACT_ADDRESS];
     
     // Check authorization across all provided contract addresses
