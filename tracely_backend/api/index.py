@@ -5,6 +5,13 @@ from dotenv import load_dotenv
 # Load environment variables IMMEDIATELY before any other imports
 load_dotenv()
 
+# MANDATORY SSL FIX FOR MACOS (Do not remove, required for MongoDB/Auth0)
+try:
+    import certifi
+    os.environ['SSL_CERT_FILE'] = certifi.where()
+except ImportError:
+    pass
+
 import sys
 import traceback
 import json
@@ -233,11 +240,16 @@ def handle_user_profile():
         if not DB_AVAILABLE:
             return jsonify({'message': 'Profile deleted (mock)'}), 200
         
-        success = delete_user(sub)
-        if success:
-            return jsonify({'message': 'Profile deleted successfully'}), 200
-        else:
-            return jsonify({'error': 'Failed to delete profile or profile not found'}), 404
+        try:
+            success = delete_user(sub)
+            if success:
+                return jsonify({'message': 'Profile deleted successfully'}), 200
+            else:
+                return jsonify({'error': 'Failed to delete profile or profile not found'}), 404
+        except Exception as e:
+            print(f"ERROR: handle_user_profile DELETE failed: {e}", file=sys.stderr)
+            traceback.print_exc()
+            return jsonify({'error': f'Server error during deletion: {str(e)}'}), 500
 
 @app.route('/api/analyze', methods=['POST', 'OPTIONS'])
 @optional_auth

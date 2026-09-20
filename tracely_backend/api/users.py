@@ -45,8 +45,11 @@ def _get_collection():
         print("[users] MONGODB_URI not set — user DB unavailable", flush=True)
         return None
 
+    import certifi
+    ca = certifi.where()
     try:
-        _client = MongoClient(uri, serverSelectionTimeoutMS=5000)
+        # tlsCAFile is required on macOS to connect to MongoDB Atlas
+        _client = MongoClient(uri, serverSelectionTimeoutMS=5000, tlsCAFile=ca)
         # Pick database from URI or fall back to 'tracely'
         db_name = uri.split("/")[-1].split("?")[0] or "tracely"
         db = _client[db_name]
@@ -105,11 +108,15 @@ def upsert_user(
         existing = col.find_one({"sub": sub}, {"_id": 0})
 
         if existing:
-            # Returning user — only update last_login + name/picture
-            col.update_one(
-                {"sub": sub},
-                {"$set": {"last_login": now, "name": name, "picture": picture}},
-            )
+            # Returning user — update details. Only set role if it's missing or effectively null.
+            update_data = {"last_login": now, "name": name, "picture": picture}
+            
+            current_role = existing.get("role")
+            if role and (not current_role or current_role in ["None", "null"]):
+                update_data["role"] = role
+                existing["role"] = role
+            
+            col.update_one({"sub": sub}, {"$set": update_data})
             existing["last_login"] = now
             return existing
         else:
@@ -142,9 +149,12 @@ def set_role(sub: str, role: str) -> bool:
 
     try:
         existing = col.find_one({"sub": sub}, {"_id": 0, "role": 1})
-        if existing and existing.get("role") and existing.get("role") != 'null':
+        current_role = existing.get("role") if existing else None
+        
+        # Allow setting if role is missing, None, "None", or "null"
+        if current_role and current_role not in [None, "None", "null"]:
             # Role already set — do NOT overwrite
-            print(f"[users] Role already set for {sub}: {existing['role']}", flush=True)
+            print(f"[users] Role already set for {sub}: {current_role}", flush=True)
             return False
 
         res = col.update_one(
