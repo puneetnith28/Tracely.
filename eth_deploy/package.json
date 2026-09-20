@@ -1,0 +1,25 @@
+{
+  "name": "eth_deploy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/chai": "^5.2.3",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^25.5.0",
+    "chai": "^6.2.2",
+    "dotenv": "^17.3.1",
+    "ethers": "^6.16.0",
+    "hardhat": "^2.22.10",
+    "mocha": "^11.7.5",
+    "solc": "^0.8.19",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,5 +1,5 @@
 // Contract configuration for SupplyChainTrust
-export const CONTRACT_ADDRESS = "0xa33f3d2701A2c5AEC08dff457ABF1967330c7ec6"; // Replace with your deployed contract address
+export const CONTRACT_ADDRESS = "0x4664CF917157735081c3ba095733a85ade5beb0f";
 
 export const CONTRACT_ABI = [
 	{
@@ -909,6 +909,12 @@ export const CONTRACT_ABI = [
 
 // Network configuration
 export const NETWORKS = {
+  SEPOLIA: {
+    chainId: '0xaa36a7', // 11155111 in hex
+    chainName: 'Ethereum Sepolia',
+    rpcUrls: ['https://ethereum-sepolia-rpc.publicnode.com'],
+    blockExplorerUrls: ['https://sepolia.etherscan.io']
+  },
   BASE_SEPOLIA: {
     chainId: '0x14a34', // 84532 in hex
     chainName: 'Base Sepolia',
@@ -917,4 +923,4 @@ export const NETWORKS = {
   }
 } as const;
 
-export const SUPPORTED_NETWORKS = [NETWORKS.BASE_SEPOLIA];
+export const SUPPORTED_NETWORKS = [NETWORKS.SEPOLIA, NETWORKS.BASE_SEPOLIA];

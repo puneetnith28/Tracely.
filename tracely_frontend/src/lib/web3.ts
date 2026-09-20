@@ -84,38 +84,38 @@ export class Web3Service {
     if (!this.provider) return;
 
     const network = await this.provider.getNetwork();
-    const targetChainId = parseInt(NETWORKS.BASE_SEPOLIA.chainId, 16);
+    const targetChainId = parseInt(NETWORKS.SEPOLIA.chainId, 16);
     
     if (network.chainId !== BigInt(targetChainId)) {
-      await this.switchToBaseSepolia();
+      await this.switchToSepolia();
     }
   }
 
-  async switchToBaseSepolia(): Promise<void> {
+  async switchToSepolia(): Promise<void> {
     try {
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: NETWORKS.BASE_SEPOLIA.chainId }],
+        params: [{ chainId: NETWORKS.SEPOLIA.chainId }],
       });
     } catch (switchError: any) {
       // This error code indicates that the chain has not been added to MetaMask
       if (switchError.code === 4902) {
-        await this.addBaseSepoliaNetwork();
+        await this.addSepoliaNetwork();
       } else {
         throw switchError;
       }
     }
   }
 
-  private async addBaseSepoliaNetwork(): Promise<void> {
+  private async addSepoliaNetwork(): Promise<void> {
     await window.ethereum.request({
       method: 'wallet_addEthereumChain',
       params: [
         {
-          chainId: NETWORKS.BASE_SEPOLIA.chainId,
-          chainName: NETWORKS.BASE_SEPOLIA.chainName,
-          rpcUrls: NETWORKS.BASE_SEPOLIA.rpcUrls,
-          blockExplorerUrls: NETWORKS.BASE_SEPOLIA.blockExplorerUrls,
+          chainId: NETWORKS.SEPOLIA.chainId,
+          chainName: NETWORKS.SEPOLIA.chainName,
+          rpcUrls: NETWORKS.SEPOLIA.rpcUrls,
+          blockExplorerUrls: NETWORKS.SEPOLIA.blockExplorerUrls,
           nativeCurrency: {
             name: 'ETH',
             symbol: 'ETH',
