@@ -1,5 +1,10 @@
 # api/index.py (improved logging & runtime checks)
 import os
+from dotenv import load_dotenv
+
+# Load environment variables IMMEDIATELY before any other imports
+load_dotenv()
+
 import sys
 import traceback
 import json
@@ -57,6 +62,13 @@ except Exception as e:
     align_and_normalize = None
     print("Vision helper import failed:", e, file=sys.stderr)
 
+try:
+    from .users import get_user, upsert_user, set_role as db_set_role, delete_user
+    DB_AVAILABLE = True
+except Exception as _e:
+    DB_AVAILABLE = False
+    print(f"User DB unavailable: {_e}", file=sys.stderr)
+
 # opencv / numpy may be heavy -> check
 try:
     import cv2  # type: ignore
@@ -72,7 +84,7 @@ except Exception as e:
 
 app = Flask(__name__)
 if CORS is not None:
-    CORS(app, resources={r"/analyze": {"origins": "*"}})
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 SCORING_VERSION = "cv-v3"
 
@@ -84,7 +96,7 @@ def _add_cors_headers(response):
         response.headers["Vary"] = "Origin"
     else:
         response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET,POST,OPTIONS"
+    response.headers["Access-Control-Allow-Methods"] = "GET,POST,DELETE,OPTIONS"
     response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
     response.headers["Access-Control-Max-Age"] = "600"
     return response
@@ -114,12 +126,10 @@ def home():
 def about():
     return 'About'
 
-@app.route('/upload', methods=['POST', 'OPTIONS'])
+@app.route('/api/upload', methods=['POST', 'OPTIONS'])
 def upload():
     """
     Secure proxy endpoint for Pinata IPFS uploads.
-    The frontend sends the file here; we forward it to Pinata using
-    the PINATA_JWT secret that lives only on the server.
     """
     if request.method == 'OPTIONS':
         return ('', 204)
@@ -135,7 +145,6 @@ def upload():
     if not file:
         return jsonify({'error': 'No file provided'}), 400
 
-    # Enforce a 16 MB limit
     file.seek(0, 2)
     file_size = file.tell()
     file.seek(0)
@@ -155,11 +164,108 @@ def upload():
             cid = result['data']['cid']
             return jsonify({'url': f'https://ipfs.io/ipfs/{cid}', 'cid': cid})
         else:
-            print('Pinata error:', result, file=sys.stderr)
             return jsonify({'error': 'Pinata upload failed', 'details': result}), 502
     except Exception as e:
-        print('Upload proxy error:', str(e), file=sys.stderr)
         return jsonify({'error': 'Upload failed', 'details': str(e)}), 500
+
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    return jsonify({
+        'status': 'ok',
+        'timestamp': datetime.now().isoformat(),
+        'db_available': DB_AVAILABLE,
+        'auth_available': AUTH_AVAILABLE
+    })
+
+@app.route('/api/user/profile', methods=['GET', 'POST', 'DELETE', 'OPTIONS'])
+@require_auth
+def handle_user_profile():
+    print(f"DEBUG: handle_user_profile {request.method} {request.url}", file=sys.stderr)
+    """
+    GET  /api/user/profile?sub=... -> Returns existing profile or 404
+    POST /api/user/profile         -> Creates/Updates profile (role is locked)
+    """
+    if request.method == 'OPTIONS':
+        return ('', 204)
+
+    if request.method == 'GET':
+        # Use sub from token instead of request args for better security
+        sub = request.auth_payload.get('sub')
+        if not sub:
+            return jsonify({'error': 'Unauthorized: sub not found in token'}), 401
+            
+        if not DB_AVAILABLE:
+            return jsonify({'error': 'Database not configured'}), 503
+        user = get_user(sub)
+        if user is None:
+            return jsonify({'error': 'User not found'}), 404
+        return jsonify(user)
+
+    if request.method == 'POST':
+        data = request.get_json(silent=True) or {}
+        # Always use the sub from the verified token
+        sub = request.auth_payload.get('sub')
+        email = data.get('email', '').strip() or request.auth_payload.get('email', '').strip()
+        name = data.get('name', '').strip() or request.auth_payload.get('name', '').strip()
+        picture = data.get('picture', '') or request.auth_payload.get('picture', '')
+        role = data.get('role', None)
+
+        if not sub or not email:
+            print(f"ERROR: handle_user_profile POST - Missing sub or email. Sub: {sub}, Email: {email}", file=sys.stderr)
+            return jsonify({'error': 'sub and email are required'}), 400
+
+        if not DB_AVAILABLE:
+            print(f"WARNING: handle_user_profile POST - Database not configured. Returning mock user for sub: {sub}", file=sys.stderr)
+            return jsonify({'sub': sub, 'email': email, 'name': name, 'picture': picture, 'role': role})
+
+        print(f"DEBUG: handle_user_profile POST - Calling upsert_user for sub: {sub}, email: {email}, name: {name}, role: {role}", file=sys.stderr)
+        user = upsert_user(sub=sub, email=email, name=name, picture=picture, role=role)
+        print(f"DEBUG: upsert_user result: {user}", file=sys.stderr)
+        
+        if role and (not user.get('role') or user.get('role') == 'null'):
+            print(f"DEBUG: Setting role {role} for existing user {sub}", file=sys.stderr)
+            db_set_role(sub, role)
+            user['role'] = role
+        return jsonify(user)
+
+    if request.method == 'DELETE':
+        sub = request.auth_payload.get('sub')
+        if not DB_AVAILABLE:
+            return jsonify({'message': 'Profile deleted (mock)'}), 200
+        
+        success = delete_user(sub)
+        if success:
+            return jsonify({'message': 'Profile deleted successfully'}), 200
+        else:
+            return jsonify({'error': 'Failed to delete profile or profile not found'}), 404
+
+@app.route('/api/analyze', methods=['POST', 'OPTIONS'])
+@optional_auth
+def analyze_image():
+    """
+    Analyzes an image to detect product information using AI ensemble.
+    """
+    if request.method == 'OPTIONS':
+        return ('', 204)
+        
+    if call_gemini_ensemble is None:
+        return jsonify({'error': 'AI vision module not available'}), 503
+    
+    file = request.files.get('file')
+    baseline_file = request.files.get('baseline')
+    view_label = request.form.get('view_label', 'Main View')
+
+    if not file or not baseline_file:
+        return jsonify({'error': 'Both baseline and current images are required'}), 400
+
+    try:
+        b_data = (baseline_file.read(), baseline_file.mimetype or 'image/jpeg')
+        c_data = (file.read(), file.mimetype or 'image/jpeg')
+        results = call_gemini_ensemble(b_data, c_data, view_label)
+        return jsonify({'timestamp': datetime.now().isoformat(), 'view': view_label, 'differences': results, 'status': 'success'})
+    except Exception as e:
+        print(f"Analysis error: {e}", file=sys.stderr)
+        return jsonify({'error': 'Analysis failed', 'details': str(e)}), 500
 
 def _load_image_bytes(source: str) -> Tuple[Optional[bytes], Optional[str]]:
     """Loads image bytes and MIME type from a URL or base64 data URI.
@@ -733,3 +839,13 @@ def analyze():
             "aggregate_tis": 100,
             "overall_assessment": "UNKNOWN"
         }), 500
+
+@app.errorhandler(404)
+def handle_404(e):
+    print(f"DEBUG: 404 error caught for path: {request.path} {request.method}", file=sys.stderr)
+    return jsonify({
+        "error": "Not Found",
+        "path": request.path,
+        "method": request.method,
+        "suggestion": "Check if your route has a trailing slash or missing /api prefix"
+    }), 404

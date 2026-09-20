@@ -1,5 +1,9 @@
 // Contract configuration for SupplyChainTrust
+<<<<<<< Updated upstream
 export const CONTRACT_ADDRESS = "0xb4F928a5793Dde1657d608C8D2b9C05F6Dfd81e2";
+=======
+export const CONTRACT_ADDRESS = "0x0b8c8f803159774F0Bc3e78B087fc1c96F2e4236";
+>>>>>>> Stashed changes
 
 export const CONTRACT_ABI = [
 	{

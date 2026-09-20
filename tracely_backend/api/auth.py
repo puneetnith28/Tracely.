@@ -25,8 +25,8 @@ except ImportError:
     REQUESTS_AVAILABLE = False
     requests = None
 
-AUTH0_DOMAIN = os.getenv('AUTH0_DOMAIN') or os.getenv('VITE_AUTH0_DOMAIN') or 'dev-s3i27lzn7dyxx1wn.us.auth0.com'
-AUTH0_AUDIENCE = os.getenv('AUTH0_AUDIENCE') or os.getenv('VITE_AUTH0_AUDIENCE') or 'https://api.tracely.app'
+AUTH0_DOMAIN = os.getenv('AUTH0_DOMAIN') or os.getenv('VITE_AUTH0_DOMAIN')
+AUTH0_AUDIENCE = os.getenv('AUTH0_AUDIENCE') or os.getenv('VITE_AUTH0_AUDIENCE')
 AUTH0_NAMESPACE = os.getenv('AUTH0_NAMESPACE') or os.getenv('VITE_AUTH0_NAMESPACE') or 'https://tracely.app'
 
 # Cache for JWKS
@@ -148,6 +148,9 @@ def require_auth(f):
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        if request.method == 'OPTIONS':
+            return f(*args, **kwargs)
+
         token = get_token_from_request()
         if not token:
             return jsonify({'error': 'Missing or invalid authorization token'}), 401
