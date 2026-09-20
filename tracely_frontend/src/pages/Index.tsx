@@ -103,9 +103,9 @@ const Index = () => {
             transition={{ duration: 0.7 }}
             className="max-w-2xl"
           >
-            <div className="inline-flex items-center gap-3 rounded-full px-3 py-2 bg-white/80 dark:bg-white/6 backdrop-blur-sm border border-primary/10">
+            <div className="inline-flex items-center gap-3 rounded-full px-3 py-2 bg-slate-800/80 dark:bg-white/10 backdrop-blur-sm border border-slate-700/50">
               <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+              <span className="text-sm font-semibold text-slate-100 dark:text-slate-200">
                 Next-Gen Supply Chain Verification
               </span>
             </div>
@@ -161,10 +161,10 @@ const Index = () => {
               ].map((b) => (
                 <div
                   key={b.label}
-                  className="flex items-center gap-2 rounded-lg px-3 py-1.5 bg-white/70 dark:bg-white/4 border border-primary/8 text-sm"
+                  className="flex items-center gap-2 rounded-lg px-3 py-1.5 bg-slate-800/80 dark:bg-white/10 border border-slate-700/50 text-sm"
                 >
                   <b.icon className="w-4 h-4 text-primary" />
-                  <span className="text-slate-700 dark:text-slate-200">
+                  <span className="text-slate-100 dark:text-slate-200">
                     {b.label}
                   </span>
                 </div>
@@ -221,7 +221,7 @@ const Index = () => {
                 <div className="mt-3 px-3 pb-4">
                   <div className="relative rounded-xl overflow-hidden p-3 bg-gradient-to-br from-white/60 to-white/20 dark:from-black/40 dark:via-black/30">
                     {/* live badge */}
-                    <div className="absolute left-3 top-3 text-xs bg-black/10 dark:bg-white/6 rounded-md px-2 py-1 text-slate-800 dark:text-slate-100">
+                    <div className="absolute left-3 top-3 text-xs bg-slate-800/80 dark:bg-white/10 backdrop-blur-sm rounded-md px-2 py-1 text-slate-100 dark:text-slate-100 border border-slate-700/50">
                       Live Demo
                     </div>
 
@@ -416,12 +416,12 @@ const Index = () => {
               ].map((f) => (
                 <div
                   key={f.title}
-                  className="flex items-center gap-3 bg-white/70 dark:bg-white/4 rounded-lg px-4 py-3"
+                  className="flex items-center gap-3 bg-slate-800/80 dark:bg-white/10 rounded-lg px-4 py-3 border border-slate-700/50"
                 >
                   <f.icon className="w-6 h-6 text-primary" />
                   <div>
-                    <div className="font-semibold">{f.title}</div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="font-semibold text-slate-100 dark:text-slate-200">{f.title}</div>
+                    <div className="text-sm text-slate-300 dark:text-slate-400">
                       Trusted by supply chain operators
                     </div>
                   </div>
