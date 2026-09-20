@@ -25,9 +25,9 @@ except ImportError:
     REQUESTS_AVAILABLE = False
     requests = None
 
-AUTH0_DOMAIN = os.getenv('AUTH0_DOMAIN', 'dev-s3i27lzn7dyxx1wn.us.auth0.com')
-AUTH0_AUDIENCE = os.getenv('AUTH0_AUDIENCE', 'https://api.Tracely.app')
-AUTH0_NAMESPACE = os.getenv('AUTH0_NAMESPACE', 'https://Tracely.app')
+AUTH0_DOMAIN = os.getenv('AUTH0_DOMAIN') or os.getenv('VITE_AUTH0_DOMAIN') or 'dev-s3i27lzn7dyxx1wn.us.auth0.com'
+AUTH0_AUDIENCE = os.getenv('AUTH0_AUDIENCE') or os.getenv('VITE_AUTH0_AUDIENCE') or 'https://api.tracely.app'
+AUTH0_NAMESPACE = os.getenv('AUTH0_NAMESPACE') or os.getenv('VITE_AUTH0_NAMESPACE') or 'https://tracely.app'
 
 # Cache for JWKS
 _jwks_client = None
@@ -95,28 +95,35 @@ def verify_token(token: str) -> Optional[Dict[str, Any]]:
     try:
         # Get signing key from JWKS
         jwks_client = get_jwks_client()
-        if jwks_client:
-            signing_key = jwks_client.get_signing_key_from_jwt(token)
-            
-            # Verify token
-            decoded = jwt.decode(
-                token,
-                signing_key.key,
-                algorithms=['RS256'],
-                audience=AUTH0_AUDIENCE,
-                issuer=f'https://{AUTH0_DOMAIN}/',
-            )
-            return decoded
-        else:
-            # Fallback: decode without verification if JWKS client unavailable
-            print("WARNING: JWKS client unavailable, decoding token without verification", file=sys.stderr)
-            return decode_token_manual(token)
+        if not jwks_client:
+            print("ERROR: JWKS client could not be initialized", file=sys.stderr)
+            return None
+
+        signing_key = jwks_client.get_signing_key_from_jwt(token)
+        
+        # Verify token with strict production settings
+        decoded = jwt.decode(
+            token,
+            signing_key.key,
+            algorithms=['RS256'],
+            audience=AUTH0_AUDIENCE,
+            issuer=f'https://{AUTH0_DOMAIN}/',
+        )
+        return decoded
     except jwt.ExpiredSignatureError:
+        print("Token verification failed: Token has expired", file=sys.stderr)
         return None
-    except jwt.InvalidTokenError:
+    except jwt.InvalidAudienceError:
+        print(f"Token verification failed: Invalid audience. Expected {AUTH0_AUDIENCE}", file=sys.stderr)
+        return None
+    except jwt.InvalidIssuerError:
+        print(f"Token verification failed: Invalid issuer. Expected https://{AUTH0_DOMAIN}/", file=sys.stderr)
+        return None
+    except jwt.InvalidTokenError as e:
+        print(f"Token verification failed: {e}", file=sys.stderr)
         return None
     except Exception as e:
-        print(f"Token verification error: {e}", file=sys.stderr)
+        print(f"Unexpected token verification error: {e}", file=sys.stderr)
         return None
 
 
