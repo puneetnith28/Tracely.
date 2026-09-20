@@ -215,8 +215,7 @@ export default function IntegrityCheck() {
     }
 
     // Call backend analyzer via Vite proxy
-    const API_BASE = (import.meta.env.VITE_BACKEND_URL as string) || "";
-    fetch(`${API_BASE}/analyze`, {
+    fetch(`/api/analyze`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

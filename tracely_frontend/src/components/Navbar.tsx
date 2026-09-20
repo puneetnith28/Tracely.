@@ -17,9 +17,45 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export const Navbar = () => {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user, logout, getAccessTokenSilently } = useAuth();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    if (!window.confirm("Are you sure you want to permanently delete your account? This action cannot be undone.")) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const token = await getAccessTokenSilently();
+      const res = await fetch('/api/user/profile', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        logout({ logoutParams: { returnTo: window.location.origin } });
+      } else {
+        let errorMsg = 'Failed to delete account';
+        try {
+          const errorData = await res.json();
+          errorMsg = errorData.error || errorMsg;
+        } catch (e) {
+          errorMsg = `Server error: ${res.status} ${res.statusText}`;
+        }
+        alert(`Error: ${errorMsg}`);
+      }
+    } catch (err: any) {
+      console.error("Deletion failed:", err);
+      alert(`Connection failed: ${err.message || 'Server unreachable'}`);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const navLinks = [
     { path: '/', label: 'Home' },
@@ -76,11 +112,19 @@ export const Navbar = () => {
                       <p className="text-sm font-medium leading-none">{user.name || 'User'}</p>
                       <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
                       <p className="text-xs leading-none text-muted-foreground mt-1">
-                        Role: {user.role.replace('_', ' ')}
+                        Role: {user.role?.replace('_', ' ') || 'None'}
                       </p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-white/10" />
+                  <DropdownMenuItem 
+                    onClick={handleDeleteAccount} 
+                    disabled={isDeleting}
+                    className="text-red-400 focus:bg-red-400/10 focus:text-red-400"
+                  >
+                    <X className="mr-2 h-4 w-4" />
+                    <span>{isDeleting ? 'Deleting...' : 'Delete Account'}</span>
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => logout()} className="text-white focus:bg-white/10">
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Log out</span>

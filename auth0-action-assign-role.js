@@ -17,7 +17,7 @@
  */
 
 exports.onExecutePostLogin = async (event, api) => {
-  const namespace = 'https://Tracely.app';
+  const namespace = 'https://tracely.app';
   
   // Check authentication method
   const connectionName = event.connection.name || '';

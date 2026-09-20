@@ -69,8 +69,7 @@ const Admin = () => {
     const formData = new FormData();
     formData.append("file", file);
     try {
-      const API_BASE = (import.meta.env.VITE_BACKEND_URL as string) || "http://127.0.0.1:5000";
-      const response = await fetch(`${API_BASE}/upload`, {
+      const response = await fetch(`/api/upload`, {
         method: "POST",
         body: formData,
       });

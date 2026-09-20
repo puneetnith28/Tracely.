@@ -8,13 +8,9 @@ export default defineConfig({
     host: "::",
     port: 8080,
     proxy: {
-      // All /api/* calls and /upload go to the Flask backend
-      "/analyze": {
-        target: "http://127.0.0.1:5000",
-        changeOrigin: true,
-      },
-      "/upload": {
-        target: "http://127.0.0.1:5000",
+      // All backend API calls
+      "/api": {
+        target: "http://127.0.0.1:5001",
         changeOrigin: true,
       },
     },

@@ -1,61 +1,42 @@
-import { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuth0, User as Auth0User } from '@auth0/auth0-react';
 import type { UserRole } from '@/types';
 
 const AUTH0_DOMAIN = import.meta.env.VITE_AUTH0_DOMAIN || 'dev-tij06cqg4bb0xmn5.us.auth0.com';
 const AUTH0_CLIENT_ID = import.meta.env.VITE_AUTH0_CLIENT_ID || 'r8p2MkfpgFPJxVXBWzTW90jbUDpgcbzL';
-// Only use audience if it's explicitly set and not empty
-const AUTH0_AUDIENCE = import.meta.env.VITE_AUTH0_AUDIENCE && import.meta.env.VITE_AUTH0_AUDIENCE.trim() !== '' 
-  ? import.meta.env.VITE_AUTH0_AUDIENCE 
-  : undefined;
-const AUTH0_NAMESPACE = import.meta.env.VITE_AUTH0_NAMESPACE || 'https://tracely.app';
+const AUTH0_AUDIENCE =
+  import.meta.env.VITE_AUTH0_AUDIENCE?.trim() || undefined;
+const AUTH0_NAMESPACE =
+  import.meta.env.VITE_AUTH0_NAMESPACE || 'https://tracely.app';
+
+export const AUTH0_CONFIG = {
+  domain: AUTH0_DOMAIN,
+  clientId: AUTH0_CLIENT_ID,
+  audience: AUTH0_AUDIENCE,
+};
 
 export interface User {
   id: string;
   email: string;
-  role: UserRole;
+  role: UserRole | null;
   name: string;
+  picture?: string;
 }
 
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
+  profileLoading: boolean;
   user: User | null;
   loginWithRedirect: (options?: any) => Promise<void>;
   logout: (options?: any) => void;
   getAccessTokenSilently: () => Promise<string>;
-  loginWithPassword: (email: string, isSignup?: boolean) => Promise<void>;
-  loginWithSocial: (connection: string, isSignup?: boolean) => Promise<void>;
-  loginWithPasswordless: (email: string, isSignup?: boolean) => Promise<void>;
+  loginWithPassword:    (email: string, isSignup?: boolean) => Promise<void>;
+  loginWithSocial:      (connection: string, isSignup?: boolean) => Promise<void>;
+  loginWithPasswordless:(email: string, isSignup?: boolean) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-const mapAuth0User = (auth0User: Auth0User | undefined): User | null => {
-  if (!auth0User) return null;
-
-  const tokenPayload = auth0User as any;
-  // Try to get role from Auth0 token claims (set by Auth0 Action/Rule)
-  // Priority: Token claim > localStorage (fallback) > default
-  const storedRole = localStorage.getItem("tracely_selected_role");
-  const role =
-    tokenPayload[`${AUTH0_NAMESPACE}/role`] || // From Auth0 Action (preferred)
-    tokenPayload.role || // Alternative claim location
-    storedRole || // Fallback to selected role
-    'WAREHOUSE'; // Default for passwordless users (logistics/warehouse)
-
-  // Clear stored role after using it (only if not from token)
-  if (storedRole && !tokenPayload[`${AUTH0_NAMESPACE}/role`]) {
-    localStorage.removeItem("tracely_selected_role");
-  }
-
-  return {
-    id: auth0User.sub || '',
-    email: auth0User.email || '',
-    role: role as UserRole,
-    name: auth0User.name || auth0User.nickname || '',
-  };
-};
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const {
@@ -67,9 +48,51 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     getAccessTokenSilently,
   } = useAuth0();
 
-  const user = mapAuth0User(auth0User);
+  const [appUser, setAppUser] = useState<User | null>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
 
-  const loginWithSocial = async (connection: string, isSignup: boolean = false) => {
+  // Whenever the Auth0 user changes, fetch their profile from MongoDB
+  useEffect(() => {
+    if (!isAuthenticated || !auth0User?.sub) {
+      setAppUser(null);
+      return;
+    }
+
+    setProfileLoading(true);
+
+    getAccessTokenSilently()
+      .then(token => {
+        return fetch(`/api/user/profile`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+      })
+      .then(async (res) => {
+        if (res.ok) {
+          const profile = await res.json();
+          setAppUser({
+            id:      profile.sub,
+            email:   profile.email || auth0User.email || '',
+            name:    profile.name  || auth0User.name  || '',
+            picture: profile.picture || auth0User.picture || '',
+            role:    (profile.role as UserRole) || fallbackRole(auth0User),
+          });
+        } else {
+          // Profile not in DB yet — use token claim as temporary fallback
+          setAppUser(buildFromAuth0User(auth0User));
+        }
+      })
+      .catch(() => {
+        // Network error — use token claim as fallback
+        setAppUser(buildFromAuth0User(auth0User));
+      })
+      .finally(() => setProfileLoading(false));
+  }, [isAuthenticated, auth0User?.sub]);
+
+  // ─── Auth0 helpers ──────────────────────────────────────────────────────────
+
+  const loginWithSocial = async (connection: string, isSignup = false) => {
     await loginWithRedirect({
       authorizationParams: {
         connection,
@@ -77,70 +100,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         scope: 'openid profile email offline_access',
         ...(isSignup && { screen_hint: 'signup' }),
       },
-      appState: {
-        returnTo: window.location.origin,
-      },
+      appState: { returnTo: '/callback' },
     });
   };
 
-  const loginWithPasswordless = async (email: string, isSignup: boolean = false) => {
-    // Store selected role for passwordless users
-    const selectedRole = localStorage.getItem("tracely_selected_role");
-    
-    await loginWithRedirect({
-      authorizationParams: {
-        connection: 'email', // Auth0 passwordless email connection
-        login_hint: email,
-        ...(AUTH0_AUDIENCE && { audience: AUTH0_AUDIENCE }),
-        scope: 'openid profile email offline_access',
-        ...(isSignup && { screen_hint: 'signup' }),
-        // Pass role as a parameter that Auth0 Action can read
-        ...(selectedRole && { 
-          // Store in appState so Auth0 Action can access it
-        }),
-      },
-      appState: {
-        returnTo: window.location.origin,
-        selectedRole: selectedRole, // Pass role to Auth0
-      },
-    });
-  };
-
-  const logout = (options?: any) => {
-    auth0Logout({
-      logoutParams: {
-        returnTo: window.location.origin,
-      },
-      ...options,
-    });
-  };
-
-  const getAuthToken = async (): Promise<string> => {
-    try {
-      return await getAccessTokenSilently({
-        ...(AUTH0_AUDIENCE && {
-          authorizationParams: {
-            audience: AUTH0_AUDIENCE,
-          },
-        }),
-      });
-    } catch (error) {
-      console.error('Failed to get access token:', error);
-      throw error;
-    }
-  };
-
-  const loginWithPassword = async (email: string, isSignup: boolean = false) => {
+  const loginWithPassword = async (email: string, isSignup = false) => {
     await loginWithRedirect({
       authorizationParams: {
         connection: 'Username-Password-Authentication',
         login_hint: email,
-        ...(AUTH0_DOMAIN && { audience: AUTH0_AUDIENCE }),
+        ...(AUTH0_AUDIENCE && { audience: AUTH0_AUDIENCE }),
         scope: 'openid profile email offline_access',
         ...(isSignup && { screen_hint: 'signup' }),
       },
-      appState: {
+      appState: { returnTo: '/callback' },
+    });
+  };
+
+  // Passwordless kept for backward compatibility
+  const loginWithPasswordless = async (email: string, _isSignup = false) => {
+    await loginWithRedirect({
+      authorizationParams: {
+        connection: 'email',
+        login_hint: email,
+        scope: 'openid profile email',
+      },
+      appState: { returnTo: '/callback' },
+    });
+  };
+
+  const logout = (options?: any) => {
+    setAppUser(null);
+    auth0Logout({
+      logoutParams: {
         returnTo: window.location.origin,
+        ...(options?.logoutParams || {}),
       },
     });
   };
@@ -149,11 +143,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     <AuthContext.Provider
       value={{
         isAuthenticated,
-        isLoading,
-        user,
+        isLoading: isLoading || profileLoading,
+        profileLoading,
+        user: appUser,
         loginWithRedirect,
         logout,
-        getAccessTokenSilently: getAuthToken,
+        getAccessTokenSilently,
         loginWithPassword,
         loginWithSocial,
         loginWithPasswordless,
@@ -165,18 +160,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 };
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used inside <AuthProvider>');
+  return ctx;
 };
 
-// Export Auth0 config constants
-export const AUTH0_CONFIG = {
-  domain: AUTH0_DOMAIN,
-  clientId: AUTH0_CLIENT_ID,
-  audience: AUTH0_AUDIENCE,
-  namespace: AUTH0_NAMESPACE,
-};
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
+function fallbackRole(auth0User: Auth0User): UserRole | null {
+  const payload = auth0User as any;
+  const role = payload[`${AUTH0_NAMESPACE}/role`] || payload.role;
+  return (role && role !== 'null' ? role : null) as UserRole | null;
+}
+
+function buildFromAuth0User(auth0User: Auth0User): User {
+  return {
+    id:      auth0User.sub || '',
+    email:   auth0User.email || '',
+    name:    auth0User.name || auth0User.nickname || '',
+    picture: auth0User.picture || '',
+    role:    fallbackRole(auth0User),
+  };
+}

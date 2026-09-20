@@ -245,8 +245,7 @@ export default function LogEvent(): JSX.Element {
     const formData = new FormData();
     formData.append("file", file);
     try {
-      const API_BASE = (import.meta.env.VITE_BACKEND_URL as string) || "http://127.0.0.1:5000";
-      const response = await fetch(`${API_BASE}/upload`, {
+      const response = await fetch(`/api/upload`, {
         method: "POST",
         body: formData,
       });
@@ -272,8 +271,7 @@ export default function LogEvent(): JSX.Element {
         const afterImageBase64 = reader.result as string;
         
         // Call integrity check API (same as IntegrityCheck.tsx)
-        const API_BASE = (import.meta.env.VITE_BACKEND_URL as string) || "/api";
-        const response = await fetch(`${API_BASE}/analyze`, {
+        const response = await fetch(`/api/analyze`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -388,8 +386,7 @@ export default function LogEvent(): JSX.Element {
       ]);
 
       // Call analyze API (same format as IntegrityCheck.tsx)
-      const API_BASE = (import.meta.env.VITE_BACKEND_URL as string) || "/api";
-      const response = await fetch(`${API_BASE}/analyze`, {
+      const response = await fetch(`/api/analyze`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -476,8 +473,7 @@ export default function LogEvent(): JSX.Element {
       const reader = new FileReader();
       reader.onload = async () => {
         const afterImageBase64 = reader.result as string;
-        const API_BASE = (import.meta.env.VITE_BACKEND_URL as string) || "/api";
-        const response = await fetch(`${API_BASE}/analyze`, {
+        const response = await fetch(`/api/analyze`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
