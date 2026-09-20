@@ -140,7 +140,7 @@ export default function LogEvent(): JSX.Element {
   const INSFORGE_BASE_URL = import.meta.env.VITE_INSFORGE_BASE_URL as string | undefined;
   const INSFORGE_ANON_KEY = import.meta.env.VITE_INSFORGE_ANON_KEY as string | undefined;
 
-  const JWT = import.meta.env.VITE_PINATA_JWT as string;
+
 
   const IMAGE_PACK_DELIMITER = "||";
 
@@ -244,20 +244,17 @@ export default function LogEvent(): JSX.Element {
     setIsUploadingImage(true);
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("network", "public");
     try {
-      const request = await fetch("https://uploads.pinata.cloud/v3/files", {
+      const API_BASE = (import.meta.env.VITE_BACKEND_URL as string) || "http://127.0.0.1:5000";
+      const response = await fetch(`${API_BASE}/upload`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${JWT}`,
-        },
         body: formData,
       });
-      const response = await request.json();
-      if (response.data?.cid) {
-        return `https://ipfs.io/ipfs/${response.data.cid}`;
+      const result = await response.json();
+      if (result.url) {
+        return result.url;
       } else {
-        throw new Error("No CID returned from Pinata.");
+        throw new Error(result.error || "Upload failed — no URL returned.");
       }
     } finally {
       setIsUploadingImage(false);

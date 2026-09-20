@@ -114,6 +114,53 @@ def home():
 def about():
     return 'About'
 
+@app.route('/upload', methods=['POST', 'OPTIONS'])
+def upload():
+    """
+    Secure proxy endpoint for Pinata IPFS uploads.
+    The frontend sends the file here; we forward it to Pinata using
+    the PINATA_JWT secret that lives only on the server.
+    """
+    if request.method == 'OPTIONS':
+        return ('', 204)
+
+    pinata_jwt = os.getenv('PINATA_JWT')
+    if not pinata_jwt:
+        return jsonify({'error': 'Pinata JWT not configured on server'}), 500
+
+    if requests is None:
+        return jsonify({'error': 'requests library not available'}), 500
+
+    file = request.files.get('file')
+    if not file:
+        return jsonify({'error': 'No file provided'}), 400
+
+    # Enforce a 16 MB limit
+    file.seek(0, 2)
+    file_size = file.tell()
+    file.seek(0)
+    if file_size > 16 * 1024 * 1024:
+        return jsonify({'error': 'File too large (max 16 MB)'}), 413
+
+    try:
+        response = requests.post(
+            'https://uploads.pinata.cloud/v3/files',
+            headers={'Authorization': f'Bearer {pinata_jwt}'},
+            files={'file': (file.filename or 'upload', file.stream, file.mimetype or 'application/octet-stream')},
+            data={'network': 'public'},
+            timeout=60,
+        )
+        result = response.json()
+        if response.status_code == 200 and result.get('data', {}).get('cid'):
+            cid = result['data']['cid']
+            return jsonify({'url': f'https://ipfs.io/ipfs/{cid}', 'cid': cid})
+        else:
+            print('Pinata error:', result, file=sys.stderr)
+            return jsonify({'error': 'Pinata upload failed', 'details': result}), 502
+    except Exception as e:
+        print('Upload proxy error:', str(e), file=sys.stderr)
+        return jsonify({'error': 'Upload failed', 'details': str(e)}), 500
+
 def _load_image_bytes(source: str) -> Tuple[Optional[bytes], Optional[str]]:
     """Loads image bytes and MIME type from a URL or base64 data URI.
 
