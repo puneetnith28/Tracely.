@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Upload, AlertTriangle, CheckCircle } from "lucide-react";
-import { Box3D } from "@/components/Box3D";
 import { useToast } from "@/hooks/use-toast";
 import ClickSpark from "@/components/ClickSpark";
 
@@ -416,9 +415,7 @@ export default function IntegrityCheck() {
                     <Upload className="w-4 h-4 mr-2" />
                     Upload Before Image
                   </Button>
-                  <div className="h-40 mt-4">
-                    <Box3D state="sealed" />
-                  </div>
+
                 </GlassCard>
               </motion.div>
 
@@ -478,9 +475,7 @@ export default function IntegrityCheck() {
                     <Upload className="w-4 h-4 mr-2" />
                     Upload After Image
                   </Button>
-                  <div className="h-40 mt-4">
-                    <Box3D state={differences ? "damaged" : "in-transit"} />
-                  </div>
+
                 </GlassCard>
               </motion.div>
             </motion.div>
@@ -653,9 +648,7 @@ export default function IntegrityCheck() {
                   <Upload className="w-4 h-4 mr-2" />
                   Upload Current 2
                 </Button>
-                <div className="h-40 mt-4">
-                  <Box3D state={differences ? "damaged" : "in-transit"} />
-                </div>
+
               </GlassCard>
             </motion.div>
           )}

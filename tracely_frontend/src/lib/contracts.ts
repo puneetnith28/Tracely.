@@ -1,9 +1,5 @@
 // Contract configuration for SupplyChainTrust
-<<<<<<< Updated upstream
-export const CONTRACT_ADDRESS = "0xb4F928a5793Dde1657d608C8D2b9C05F6Dfd81e2";
-=======
-export const CONTRACT_ADDRESS = "0x0b8c8f803159774F0Bc3e78B087fc1c96F2e4236";
->>>>>>> Stashed changes
+export const CONTRACT_ADDRESS = "0x4664CF917157735081c3ba095733a85ade5beb0f";
 
 export const CONTRACT_ABI = [
 	{
@@ -913,18 +909,18 @@ export const CONTRACT_ABI = [
 
 // Network configuration
 export const NETWORKS = {
-  SEPOLIA: {
-    chainId: '0xaa36a7', // 11155111 in hex
-    chainName: 'Ethereum Sepolia',
-    rpcUrls: ['https://ethereum-sepolia-rpc.publicnode.com'],
-    blockExplorerUrls: ['https://sepolia.etherscan.io']
-  },
-  BASE_SEPOLIA: {
-    chainId: '0x14a34', // 84532 in hex
-    chainName: 'Base Sepolia',
-    rpcUrls: ['https://sepolia.base.org'],
-    blockExplorerUrls: ['https://sepolia.basescan.org']
-  }
+	SEPOLIA: {
+		chainId: '0xaa36a7', // 11155111 in hex
+		chainName: 'Ethereum Sepolia',
+		rpcUrls: ['https://ethereum-sepolia-rpc.publicnode.com'],
+		blockExplorerUrls: ['https://sepolia.etherscan.io']
+	},
+	BASE_SEPOLIA: {
+		chainId: '0x14a34', // 84532 in hex
+		chainName: 'Base Sepolia',
+		rpcUrls: ['https://sepolia.base.org'],
+		blockExplorerUrls: ['https://sepolia.basescan.org']
+	}
 } as const;
 
 export const SUPPORTED_NETWORKS = [NETWORKS.SEPOLIA, NETWORKS.BASE_SEPOLIA];
