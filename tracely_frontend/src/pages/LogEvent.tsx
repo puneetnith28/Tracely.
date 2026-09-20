@@ -942,6 +942,9 @@ export default function LogEvent(): JSX.Element {
                             )}
                           </Button>
                         </div>
+                        <p className="text-[11px] text-muted-foreground mt-1">
+                          <span className="font-semibold text-blue-600">Tip (Angle 1):</span> Capture a clear, top-down view of the security seal or label.
+                        </p>
 
                         {uploadedImageFileAngle1 && selectedBatch && (
                           <div className="mt-4 p-4 border rounded-lg bg-muted/50">
@@ -1081,6 +1084,9 @@ export default function LogEvent(): JSX.Element {
                             )}
                           </Button>
                         </div>
+                        <p className="text-[11px] text-muted-foreground mt-1">
+                          <span className="font-semibold text-blue-600">Tip (Angle 2):</span> Capture the side profile or a 45° angle to show package structural integrity.
+                        </p>
 
                         {uploadedImageFileAngle2 && selectedBatch && (
                           <div className="mt-4 p-4 border rounded-lg bg-muted/50">
@@ -1248,8 +1254,21 @@ export default function LogEvent(): JSX.Element {
                 </div>
                 <p className="text-sm text-muted-foreground mt-2">
                   Or use one of the demo batches: <b>CHT-001-ABC</b>,{" "}
-                  <b>CHT-002-XYZ</b>, or <b>CHT-DEMO</b>.
+                  <b>CHT-340-WCL</b>.
                 </p>
+
+                <div className="mt-6 pt-6 border-t space-y-3">
+                  <h3 className="font-semibold flex items-center gap-2 text-blue-600">
+                    <Camera className="h-4 w-4" />
+                    Photography Tips for Integrity
+                  </h3>
+                  <ul className="text-sm space-y-2 list-disc pl-4 text-muted-foreground">
+                    <li><b>Lighting:</b> Ensure even lighting to avoid harsh shadows on the seal.</li>
+                    <li><b>Focus:</b> Hold the camera steady until the text/barcode is sharp.</li>
+                    <li><b>Distance:</b> Capture the target area closely, filling ~60% of the frame.</li>
+                    <li><b>Cleanliness:</b> Ensure the lens is clean for maximum TIS score accuracy.</li>
+                  </ul>
+                </div>
               </div>
 
               <div className="p-4 bg-muted rounded-lg space-y-2">
