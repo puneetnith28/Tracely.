@@ -17,6 +17,7 @@
 ---
 
 ## 📌 Table of Contents
+- [Comprehensive Documentation Suite](#-comprehensive-documentation-suite)
 - [Executive Summary](#-executive-summary)
 - [The Problem We Solve](#-the-problem-we-solve)
 - [System Architecture & The Tracely Protocol](#-system-architecture--the-tracely-protocol)
@@ -28,6 +29,22 @@
 - [Getting Started & Installation](#-getting-started--installation)
 - [Environment Variables](#-environment-variables)
 - [Hackathon Submission Information](#-hackathon-submission-information)
+
+---
+
+## 📚 Comprehensive Documentation Suite
+
+We have thoroughly documented every aspect of Tracely in the [`docs/`](docs/) directory. Whether you are expanding the forensic AI capabilities, auditing the smart contract, or deploying to production, these guides will provide deep technical context.
+
+1. [**Architecture & Topology**](docs/architecture-and-topology.md): Deep dive into the system topology, including React Frontend, Flask API Gateway, Google Gemini Vision Ensemble, IPFS, and Ethereum Sepolia smart contract.
+2. [**AI Forensic Consensus & Vision Pipeline**](docs/ai-forensic-consensus.md): Detailed explanation of the Gemini Vision ensemble, strict JSON schema validation, OpenCV homography alignment, and TIS algorithm.
+3. [**Smart Contract & Ledger**](docs/smart-contract-and-ledger.md): In-depth analysis of the Solidity contract (`SupplyChainTrust.sol`), batch tracking, on-chain events, cryptographic event hashing, and Ethereum Sepolia deployment.
+4. [**Data Model & State Machines**](docs/data-model-and-state-machines.md): Comprehensive breakdown of the MongoDB Atlas schema, digital twin records, and the full physical custody lifecycle state transitions.
+5. [**Security & Authentication**](docs/security-and-authentication.md): Documentation on Auth0 JWT RS256 validation, custom token claims, passwordless & social login flows, Flask auth decorators, and smart contract access control.
+6. [**UI & Design System**](docs/ui-and-design-system.md): Overview of the React 18, TailwindCSS, shadcn/ui, cyberpunk glassmorphism aesthetic, 3D interactive components, and visual inspection overlay.
+7. [**API Reference**](docs/api-reference.md): Complete endpoint contracts for `/api/analyze`, `/api/analyze_multipart`, `/api/upload`, `/api/user/profile`, and `/api/health`.
+8. [**Development Guide**](docs/development-guide.md): Local environment setup, running Flask backend and Vite frontend, Hardhat smart contract workflows, and Requestly network simulation.
+9. [**Environment Configuration**](docs/environment-configuration.md): Master reference template and deep-dive explanation for all required API keys, blockchain RPCs, IPFS secrets, and Auth0 parameters.
 
 ---
 
