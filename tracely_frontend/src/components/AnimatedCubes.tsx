@@ -4,6 +4,7 @@ import gsap from 'gsap';
 
 export const AnimatedCubes = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  
 
   useEffect(() => {
     if (!containerRef.current) return;
