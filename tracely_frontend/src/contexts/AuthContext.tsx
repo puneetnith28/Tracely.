@@ -2,8 +2,8 @@ import { createContext, useContext, ReactNode } from 'react';
 import { useAuth0, User as Auth0User } from '@auth0/auth0-react';
 import type { UserRole } from '@/types';
 
-const AUTH0_DOMAIN = import.meta.env.VITE_AUTH0_DOMAIN || 'dev-s3i27lzn7dyxx1wn.us.auth0.com';
-const AUTH0_CLIENT_ID = import.meta.env.VITE_AUTH0_CLIENT_ID || 'Cj5gX5DefENe5HAea91BmcXzxJvxWHUw';
+const AUTH0_DOMAIN = import.meta.env.VITE_AUTH0_DOMAIN || 'dev-tij06cqg4bb0xmn5.us.auth0.com';
+const AUTH0_CLIENT_ID = import.meta.env.VITE_AUTH0_CLIENT_ID || 'r8p2MkfpgFPJxVXBWzTW90jbUDpgcbzL';
 // Only use audience if it's explicitly set and not empty
 const AUTH0_AUDIENCE = import.meta.env.VITE_AUTH0_AUDIENCE && import.meta.env.VITE_AUTH0_AUDIENCE.trim() !== '' 
   ? import.meta.env.VITE_AUTH0_AUDIENCE 
