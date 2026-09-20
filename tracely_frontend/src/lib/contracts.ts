@@ -1,5 +1,5 @@
 // Contract configuration for SupplyChainTrust
-export const CONTRACT_ADDRESS = "0x4664CF917157735081c3ba095733a85ade5beb0f";
+export const CONTRACT_ADDRESS = "0xb4F928a5793Dde1657d608C8D2b9C05F6Dfd81e2";
 
 export const CONTRACT_ABI = [
 	{
